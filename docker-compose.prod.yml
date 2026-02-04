@@ -24,6 +24,9 @@ services:
     build:
       context: ./client
       dockerfile: Dockerfile
+      args:
+        - REACT_APP_API_URL=https://agencyadmin.innothinklabs.com/api
+        - FILES_SERVER=https://agencyadmin.innothinklabs.com
     container_name: innothinklab-frontend-prod
     restart: unless-stopped
     environment:
