@@ -31,16 +31,7 @@ app.use(cors({
   credentials: true
 }));
 
-// Serve static files in production
-if (process.env.NODE_ENV === 'production') {
-  // Serve React build files
-  app.use(express.static(path.join(__dirname, '../client/public')));
-  
-  // Handle React routing, return all requests to React app
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/public', 'index.html'));
-  });
-}
+// Static file serving is handled by NGINX in production
 
 // Database connection
 mongoose.connect(process.env.MONGODB_URI)
