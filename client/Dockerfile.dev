@@ -1,0 +1,15 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+
+# Use npm ci for consistency and add registry workaround
+RUN npm config set registry https://registry.npmjs.org/ && \
+    npm ci --legacy-peer-deps
+
+COPY . .
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
