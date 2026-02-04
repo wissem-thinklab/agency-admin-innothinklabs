@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: innothinklab-backend-prod
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+    env_file:
+      - ./server/.env
+    volumes:
+      - ./server/uploads:/app/uploads
+    ports:
+      - "5000:5000"
+    networks:
+      - innothinklab-network
+    command: node server.js
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: innothinklab-frontend-prod
+    restart: unless-stopped
+    environment:
+      - REACT_APP_API_URL=https://agencyadmin.innothinklabs.com/api
+      - FILES_SERVER=https://agencyadmin.innothinklabs.com
+    ports:
+      - "3000:80"
+    networks:
+      - innothinklab-network
+
+networks:
+  innothinklab-network:
+    driver: bridge
