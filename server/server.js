@@ -34,11 +34,11 @@ app.use(cors({
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
   // Serve React build files
-  app.use(express.static(path.join(__dirname, '../public')));
+  app.use(express.static(path.join(__dirname, '../client/public')));
   
   // Handle React routing, return all requests to React app
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public', 'index.html'));
+    res.sendFile(path.join(__dirname, '../client/public', 'index.html'));
   });
 }
 
