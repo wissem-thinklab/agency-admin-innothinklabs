@@ -18,7 +18,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // CORS middleware
-const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'];
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3001'];
 
 app.use(cors({
   origin: function(origin, callback) {
@@ -56,6 +56,8 @@ app.use('/api/tags', require('./routes/tags'));
 app.use('/api/projects', require('./routes/projects'));
 app.use('/api/services', require('./routes/services'));
 app.use('/api/upload', require('./routes/upload'));
+app.use('/api/newsletter', require('./routes/newsletter'));
+app.use('/api/messages', require('./routes/messages'));
 
 // Protected routes example
 app.get('/api/admin/dashboard', require('./middleware/auth').authenticate, require('./middleware/auth').requireAdmin, (req, res) => {

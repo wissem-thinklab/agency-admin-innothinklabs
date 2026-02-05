@@ -8,6 +8,8 @@ import Dashboard from './pages/Dashboard';
 import Blogs from './pages/Blogs';
 import Projects from './pages/Projects';
 import Services from './pages/Services';
+import Newsletter from './pages/Newsletter';
+import Messages from './pages/Messages';
 import './App.css';
 
 function App() {
@@ -29,6 +31,8 @@ function App() {
               <Route path="blogs" element={<Blogs />} />
               <Route path="projects" element={<Projects />} />
               <Route path="services" element={<Services />} />
+              <Route path="newsletter" element={<Newsletter />} />
+              <Route path="messages" element={<Messages />} />
             </Route>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />

@@ -256,4 +256,157 @@ export const uploadAPI = {
   },
 };
 
+// Newsletter API calls
+export const newsletterAPI = {
+  getNewsletters: async (params = {}) => {
+    const response = await api.get('/newsletter', { params });
+    return response.data;
+  },
+
+  getNewsletter: async (id) => {
+    const response = await api.get(`/newsletter/${id}`);
+    return response.data;
+  },
+
+  createNewsletter: async (newsletterData) => {
+    const response = await api.post('/newsletter', newsletterData);
+    return response.data;
+  },
+
+  updateNewsletter: async (id, newsletterData) => {
+    const response = await api.put(`/newsletter/${id}`, newsletterData);
+    return response.data;
+  },
+
+  deleteNewsletter: async (id) => {
+    const response = await api.delete(`/newsletter/${id}`);
+    return response.data;
+  },
+
+  bulkOperation: async (action, emails, data = {}) => {
+    const response = await api.post('/newsletter/bulk', {
+      action,
+      emails,
+      data
+    });
+    return response.data;
+  },
+
+  exportNewsletters: async (params = {}) => {
+    const response = await api.get('/newsletter/export', { 
+      params,
+      responseType: params.format === 'csv' ? 'blob' : 'json'
+    });
+    
+    if (params.format === 'csv') {
+      // Create download link for CSV
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `newsletter_export_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      return { success: true };
+    }
+    
+    return response.data;
+  },
+
+  getStats: async () => {
+    const response = await api.get('/newsletter/stats');
+    return response.data;
+  },
+
+  // Send email campaign
+  sendCampaign: async (campaignData) => {
+    const formData = new FormData();
+    
+    // Append form fields
+    Object.keys(campaignData).forEach(key => {
+      if (key !== 'htmlFile') {
+        formData.append(key, campaignData[key]);
+      }
+    });
+    
+    // Append file if exists
+    if (campaignData.htmlFile) {
+      formData.append('htmlFile', campaignData.htmlFile);
+    }
+    
+    const response = await api.post('/newsletter/send-campaign', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    
+    return response.data;
+  }
+};
+
+// Message API calls
+export const messageAPI = {
+  getMessages: async (params = {}) => {
+    const response = await api.get('/messages', { params });
+    return response.data;
+  },
+
+  getMessage: async (id) => {
+    const response = await api.get(`/messages/${id}`);
+    return response.data;
+  },
+
+  createMessage: async (messageData) => {
+    const response = await api.post('/messages', messageData);
+    return response.data;
+  },
+
+  updateMessage: async (id, messageData) => {
+    const response = await api.put(`/messages/${id}`, messageData);
+    return response.data;
+  },
+
+  deleteMessage: async (id) => {
+    const response = await api.delete(`/messages/${id}`);
+    return response.data;
+  },
+
+  bulkOperation: async (action, messageIds, data = {}) => {
+    const response = await api.post('/messages/bulk', {
+      action,
+      messageIds,
+      data
+    });
+    return response.data;
+  },
+
+  exportMessages: async (params = {}) => {
+    const response = await api.get('/messages/export', { 
+      params,
+      responseType: params.format === 'csv' ? 'blob' : 'json'
+    });
+    
+    if (params.format === 'csv') {
+      // Create download link for CSV
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `messages_export_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      return { success: true };
+    }
+    
+    return response.data;
+  },
+
+  getStats: async () => {
+    const response = await api.get('/messages/stats');
+    return response.data;
+  }
+};
+
 export default api;
