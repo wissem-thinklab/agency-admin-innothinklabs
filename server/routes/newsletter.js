@@ -87,7 +87,7 @@ router.get('/stats', async (req, res) => {
     const bouncedSubscribers = await Newsletter.countDocuments({ status: 'bounced' });
     
     const recentSubscribers = await Newsletter.find()
-      .sort({ createdAt: -1 })
+      .sort({ subscribedAt: -1 })
       .limit(5);
     
     const subscribersBySource = await Newsletter.aggregate([

@@ -49,15 +49,27 @@ app.get('/api/health', (req, res) => {
 });
 
 // Routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/blogposts', require('./routes/blogs'));
-app.use('/api/categories', require('./routes/categories'));
-app.use('/api/tags', require('./routes/tags'));
-app.use('/api/projects', require('./routes/projects'));
-app.use('/api/services', require('./routes/services'));
-app.use('/api/upload', require('./routes/upload'));
-app.use('/api/newsletter', require('./routes/newsletter'));
-app.use('/api/messages', require('./routes/messages'));
+const authRoutes = require('./routes/auth');
+const blogRoutes = require('./routes/blogs');
+const projectRoutes = require('./routes/projects');
+const serviceRoutes = require('./routes/services');
+const newsletterRoutes = require('./routes/newsletter');
+const messageRoutes = require('./routes/messages');
+const analyticsRoutes = require('./routes/analytics');
+const categoriesRoutes = require('./routes/categories');
+const tagsRoutes = require('./routes/tags');
+const uploadRoutes = require('./routes/upload');
+
+app.use('/api/auth', authRoutes);
+app.use('/api/blogs', blogRoutes);
+app.use('/api/categories', categoriesRoutes);
+app.use('/api/tags', tagsRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/services', serviceRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/newsletter', newsletterRoutes);
+app.use('/api/messages', messageRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Protected routes example
 app.get('/api/admin/dashboard', require('./middleware/auth').authenticate, require('./middleware/auth').requireAdmin, (req, res) => {

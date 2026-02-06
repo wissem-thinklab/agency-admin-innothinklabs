@@ -1,8 +1,15 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Dashboard.css';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+
+  const handleCardClick = (path) => {
+    navigate(path);
+  };
+
   const { user, logout } = useAuth();
 
   const handleLogout = () => {
@@ -43,7 +50,7 @@ const Dashboard = () => {
               <button className="card-button">Manage Content</button>
             </div>
 
-            <div className="dashboard-card">
+            <div className="dashboard-card" onClick={() => handleCardClick('/dashboard/analytics')}>
               <h3>Analytics</h3>
               <p>View website analytics and reports</p>
               <button className="card-button">View Analytics</button>

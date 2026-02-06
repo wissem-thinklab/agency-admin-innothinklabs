@@ -5,6 +5,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AdminLayout from './components/Layout/AdminLayout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import Analytics from './pages/Analytics';
 import Blogs from './pages/Blogs';
 import Projects from './pages/Projects';
 import Services from './pages/Services';
@@ -28,6 +29,7 @@ function App() {
               }
             >
               <Route index element={<Dashboard />} />
+              <Route path="analytics" element={<Analytics />} />
               <Route path="blogs" element={<Blogs />} />
               <Route path="projects" element={<Projects />} />
               <Route path="services" element={<Services />} />

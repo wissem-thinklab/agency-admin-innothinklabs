@@ -67,6 +67,51 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Get message statistics
+router.get('/stats', async (req, res) => {
+  try {
+    const totalMessages = await Message.countDocuments();
+    const unreadMessages = await Message.countDocuments({ status: 'unread' });
+    const readMessages = await Message.countDocuments({ status: 'read' });
+    const repliedMessages = await Message.countDocuments({ status: 'replied' });
+    const archivedMessages = await Message.countDocuments({ status: 'archived' });
+    
+    const messagesByPriority = await Message.aggregate([
+      { $group: { _id: '$priority', count: { $sum: 1 } } }
+    ]);
+    
+    const messagesBySource = await Message.aggregate([
+      { $group: { _id: '$source', count: { $sum: 1 } } }
+    ]);
+    
+    const recentMessages = await Message.find()
+      .populate('assignedTo', 'name email')
+      .sort({ submittedAt: -1 })
+      .limit(5);
+    
+    res.json({
+      success: true,
+      data: {
+        totalMessages,
+        unreadMessages,
+        readMessages,
+        repliedMessages,
+        archivedMessages,
+        messagesByPriority,
+        messagesBySource,
+        recentMessages
+      }
+    });
+  } catch (error) {
+    console.error('Get message stats error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch message statistics',
+      error: error.message
+    });
+  }
+});
+
 // Get single message by ID
 router.get('/:id', async (req, res) => {
   try {
@@ -307,63 +352,38 @@ router.post('/bulk', async (req, res) => {
   }
 });
 
-// Get statistics
+// Get message statistics
 router.get('/stats', async (req, res) => {
   try {
-    const stats = await Message.aggregate([
-      {
-        $group: {
-          _id: null,
-          total: { $sum: 1 },
-          unread: { $sum: { $cond: [{ $eq: ['$status', 'unread'] }, 1, 0] } },
-          read: { $sum: { $cond: [{ $eq: ['$status', 'read'] }, 1, 0] } },
-          replied: { $sum: { $cond: [{ $eq: ['$status', 'replied'] }, 1, 0] } },
-          archived: { $sum: { $cond: [{ $eq: ['$status', 'archived'] }, 1, 0] } }
-        }
-      },
-      {
-        $group: {
-          _id: '$priority',
-          count: { $sum: 1 }
-        }
-      },
-      {
-        $group: {
-          _id: '$source',
-          count: { $sum: 1 }
-        }
-      },
-      {
-        $group: {
-          _id: null,
-          priorities: { $push: { k: '$_id', v: '$count' } },
-          sources: { $push: { k: '$_id', v: '$count' } },
-          total: { $first: '$total' },
-          unread: { $first: '$unread' },
-          read: { $first: '$read' },
-          replied: { $first: '$replied' },
-          archived: { $first: '$archived' }
-        }
-      }
+    const totalMessages = await Message.countDocuments();
+    const unreadMessages = await Message.countDocuments({ status: 'unread' });
+    const readMessages = await Message.countDocuments({ status: 'read' });
+    const repliedMessages = await Message.countDocuments({ status: 'replied' });
+    const archivedMessages = await Message.countDocuments({ status: 'archived' });
+    
+    const messagesByPriority = await Message.aggregate([
+      { $group: { _id: '$priority', count: { $sum: 1 } } }
+    ]);
+    
+    const messagesBySource = await Message.aggregate([
+      { $group: { _id: '$source', count: { $sum: 1 } } }
     ]);
     
     const recentMessages = await Message.find()
       .populate('assignedTo', 'name email')
-      .sort({ createdAt: -1 })
+      .sort({ submittedAt: -1 })
       .limit(5);
     
     res.json({
       success: true,
       data: {
-        stats: stats[0] || { 
-          total: 0, 
-          unread: 0, 
-          read: 0, 
-          replied: 0, 
-          archived: 0,
-          priorities: [],
-          sources: []
-        },
+        totalMessages,
+        unreadMessages,
+        readMessages,
+        repliedMessages,
+        archivedMessages,
+        messagesByPriority,
+        messagesBySource,
         recentMessages
       }
     });
@@ -389,7 +409,7 @@ router.get('/export', async (req, res) => {
     
     const messages = await Message.find(query)
       .populate('assignedTo', 'name email')
-      .sort({ createdAt: -1 });
+      .sort({ submittedAt: -1 });
     
     if (format === 'csv') {
       // Convert to CSV

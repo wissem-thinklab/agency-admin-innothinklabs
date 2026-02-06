@@ -265,19 +265,19 @@ const Newsletter = () => {
       <div className="stats-grid">
         <div className="stat-card">
           <h3>Total Subscribers</h3>
-          <span className="stat-number">{stats?.stats?.total || 0}</span>
+          <span className="stat-number">{stats?.totalSubscribers || 0}</span>
         </div>
         <div className="stat-card">
           <h3>Active</h3>
-          <span className="stat-number active">{stats?.stats?.active || 0}</span>
+          <span className="stat-number active">{stats?.activeSubscribers || 0}</span>
         </div>
         <div className="stat-card">
           <h3>Unsubscribed</h3>
-          <span className="stat-number unsubscribed">{stats?.stats?.unsubscribed || 0}</span>
+          <span className="stat-number unsubscribed">{stats?.unsubscribedSubscribers || 0}</span>
         </div>
         <div className="stat-card">
           <h3>Bounced</h3>
-          <span className="stat-number bounced">{stats?.stats?.bounced || 0}</span>
+          <span className="stat-number bounced">{stats?.bouncedSubscribers || 0}</span>
         </div>
       </div>
 

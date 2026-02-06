@@ -233,19 +233,19 @@ const Messages = () => {
       <div className="stats-grid">
         <div className="stat-card">
           <h3>Total Messages</h3>
-          <span className="stat-number">{stats?.stats?.total || 0}</span>
+          <span className="stat-number">{stats?.totalMessages || 0}</span>
         </div>
         <div className="stat-card">
           <h3>Unread</h3>
-          <span className="stat-number unread">{stats?.stats?.unread || 0}</span>
+          <span className="stat-number unread">{stats?.unreadMessages || 0}</span>
         </div>
         <div className="stat-card">
           <h3>Read</h3>
-          <span className="stat-number read">{stats?.stats?.read || 0}</span>
+          <span className="stat-number read">{stats?.readMessages || 0}</span>
         </div>
         <div className="stat-card">
           <h3>Replied</h3>
-          <span className="stat-number replied">{stats?.stats?.replied || 0}</span>
+          <span className="stat-number replied">{stats?.repliedMessages || 0}</span>
         </div>
       </div>
 
