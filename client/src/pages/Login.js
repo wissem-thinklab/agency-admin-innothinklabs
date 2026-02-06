@@ -106,7 +106,7 @@ const Login = () => {
               value={formData.email}
               onChange={handleChange}
               className={errors.email ? 'error' : ''}
-              placeholder="admin@innothinklab.com"
+              placeholder="Enter your email"
               disabled={isSubmitting}
             />
             {errors.email && <span className="error-text">{errors.email}</span>}
@@ -136,11 +136,7 @@ const Login = () => {
           </button>
         </form>
 
-        <div className="login-footer">
-          <p>
-            Default credentials: admin@innothinklab.com / admin123456
-          </p>
-        </div>
+        
       </div>
     </div>
   );
