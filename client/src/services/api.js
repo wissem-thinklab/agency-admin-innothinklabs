@@ -79,37 +79,37 @@ export const adminAPI = {
 // Blog API calls
 export const blogAPI = {
   getBlogs: async (params = {}) => {
-    const response = await api.get('/blogposts', { params });
+    const response = await api.get('/blogs', { params });
     return response.data;
   },
   
   getBlog: async (id) => {
-    const response = await api.get(`/blogposts/${id}`);
+    const response = await api.get(`/blogs/${id}`);
     return response.data;
   },
   
   createBlog: async (blogData) => {
-    const response = await api.post('/blogposts', blogData);
+    const response = await api.post('/blogs', blogData);
     return response.data;
   },
   
   updateBlog: async (id, blogData) => {
-    const response = await api.put(`/blogposts/${id}`, blogData);
+    const response = await api.put(`/blogs/${id}`, blogData);
     return response.data;
   },
   
   deleteBlog: async (id) => {
-    const response = await api.delete(`/blogposts/${id}`);
+    const response = await api.delete(`/blogs/${id}`);
     return response.data;
   },
   
   togglePublish: async (id) => {
-    const response = await api.patch(`/blogposts/${id}/toggle-publish`);
+    const response = await api.patch(`/blogs/${id}/toggle-publish`);
     return response.data;
   },
   
   getBlogStats: async () => {
-    const response = await api.get('/blogposts/stats/overview');
+    const response = await api.get('/blogs/stats/overview');
     return response.data;
   },
 };

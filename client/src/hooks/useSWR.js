@@ -32,7 +32,7 @@ export const useBlogs = (filters = {}) => {
   });
 
   const { data, error, isLoading, mutate } = useSWR(
-    `/blogposts?${queryParams}`,
+    `/blogs?${queryParams}`,
     fetcher
   );
 

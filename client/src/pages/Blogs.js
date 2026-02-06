@@ -37,10 +37,10 @@ const Blogs = () => {
 
   // Update pagination state when SWR pagination changes
   useEffect(() => {
-    if (swrPagination) {
+    if (swrPagination && JSON.stringify(swrPagination) !== JSON.stringify(pagination)) {
       setPagination(swrPagination);
     }
-  }, [swrPagination]);
+  }, [swrPagination?.page, swrPagination?.limit, swrPagination?.total, swrPagination?.pages]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;

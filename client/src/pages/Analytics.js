@@ -47,7 +47,15 @@ const Analytics = () => {
   if (isLoading) {
     return (
       <div className="analytics-container">
-        <div className="loading-spinner">Loading analytics...</div>
+        <div className="analytics-loading">
+          <div className="loading-icon">📊</div>
+          <div className="loading-text">Loading analytics data...</div>
+          <div className="loading-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
       </div>
     );
   }
