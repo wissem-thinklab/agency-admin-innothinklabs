@@ -78,6 +78,164 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Get newsletter statistics
+router.get('/stats', async (req, res) => {
+  try {
+    const totalSubscribers = await Newsletter.countDocuments();
+    const activeSubscribers = await Newsletter.countDocuments({ status: 'active' });
+    const unsubscribedSubscribers = await Newsletter.countDocuments({ status: 'unsubscribed' });
+    const bouncedSubscribers = await Newsletter.countDocuments({ status: 'bounced' });
+    
+    const recentSubscribers = await Newsletter.find()
+      .sort({ createdAt: -1 })
+      .limit(5);
+    
+    const subscribersBySource = await Newsletter.aggregate([
+      { $group: { _id: '$source', count: { $sum: 1 } } }
+    ]);
+    
+    const subscribersByStatus = await Newsletter.aggregate([
+      { $group: { _id: '$status', count: { $sum: 1 } } }
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        totalSubscribers,
+        activeSubscribers,
+        unsubscribedSubscribers,
+        bouncedSubscribers,
+        recentSubscribers,
+        subscribersBySource,
+        subscribersByStatus
+      }
+    });
+  } catch (error) {
+    console.error('Get newsletter stats error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch newsletter statistics',
+      error: error.message
+    });
+  }
+});
+
+// Send email campaign to newsletter subscribers
+router.post('/send-campaign', upload.single('htmlFile'), async (req, res) => {
+  try {
+    const { subject, selectedSubscribers = 'all', status = 'active' } = req.body;
+    
+    if (!subject) {
+      return res.status(400).json({
+        success: false,
+        message: 'Subject is required for email campaign'
+      });
+    }
+    
+    let htmlContent;
+    
+    // Handle HTML file upload
+    if (req.file) {
+      try {
+        htmlContent = await fs.readFile(req.file.path, 'utf8');
+        // Clean up uploaded file
+        await fs.unlink(req.file.path);
+      } catch (fileError) {
+        return res.status(400).json({
+          success: false,
+          message: 'Failed to read uploaded HTML file',
+          error: fileError.message
+        });
+      }
+    } else if (req.body.htmlContent) {
+      htmlContent = req.body.htmlContent;
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: 'Either HTML file upload or HTML content is required'
+      });
+    }
+    
+    // Build subscriber query
+    let subscriberQuery = {};
+    if (selectedSubscribers !== 'all') {
+      const subscriberIds = Array.isArray(selectedSubscribers) 
+        ? selectedSubscribers 
+        : selectedSubscribers.split(',').map(id => id.trim());
+      
+      subscriberQuery = {
+        _id: { $in: subscriberIds },
+        status: status
+      };
+    } else {
+      subscriberQuery = { status };
+    }
+    
+    // Get subscribers
+    const subscribers = await Newsletter.find(subscriberQuery);
+    
+    if (subscribers.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No subscribers found matching the criteria'
+      });
+    }
+    
+    // Send emails to all subscribers
+    const results = [];
+    const errors = [];
+    
+    for (const subscriber of subscribers) {
+      try {
+        const emailResult = await sendEmail({
+          to: subscriber.email,
+          subject: subject,
+          html: htmlContent,
+          text: htmlContent.replace(/<[^>]*>/g, '') // Basic HTML to text conversion
+        });
+        
+        results.push({
+          email: subscriber.email,
+          success: true,
+          messageId: emailResult.messageId
+        });
+        
+        console.log(`Campaign email sent to ${subscriber.email}`);
+        
+      } catch (emailError) {
+        errors.push({
+          email: subscriber.email,
+          error: emailError.message
+        });
+        console.error(`Failed to send campaign email to ${subscriber.email}:`, emailError);
+      }
+      
+      // Small delay between emails to avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    res.json({
+      success: true,
+      message: `Email campaign sent to ${results.length} subscribers`,
+      data: {
+        totalSubscribers: subscribers.length,
+        successfulSends: results.length,
+        failedSends: errors.length,
+        results,
+        errors
+      }
+    });
+    
+  } catch (error) {
+    console.error('Email campaign error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send email campaign',
+      error: error.message
+    });
+  }
+});
+
 // Get single newsletter by ID
 router.get('/:id', async (req, res) => {
   try {
@@ -404,122 +562,6 @@ router.get('/stats', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch newsletter statistics',
-      error: error.message
-    });
-  }
-});
-
-// Send email campaign to newsletter subscribers
-router.post('/send-campaign', upload.single('htmlFile'), async (req, res) => {
-  try {
-    const { subject, selectedSubscribers = 'all', status = 'active' } = req.body;
-    
-    if (!subject) {
-      return res.status(400).json({
-        success: false,
-        message: 'Subject is required for email campaign'
-      });
-    }
-    
-    let htmlContent;
-    
-    // Handle HTML file upload
-    if (req.file) {
-      try {
-        htmlContent = await fs.readFile(req.file.path, 'utf8');
-        // Clean up uploaded file
-        await fs.unlink(req.file.path);
-      } catch (fileError) {
-        return res.status(400).json({
-          success: false,
-          message: 'Failed to read uploaded HTML file',
-          error: fileError.message
-        });
-      }
-    } else if (req.body.htmlContent) {
-      htmlContent = req.body.htmlContent;
-    } else {
-      return res.status(400).json({
-        success: false,
-        message: 'Either HTML file upload or HTML content is required'
-      });
-    }
-    
-    // Build subscriber query
-    let subscriberQuery = {};
-    if (selectedSubscribers !== 'all') {
-      const subscriberIds = Array.isArray(selectedSubscribers) 
-        ? selectedSubscribers 
-        : selectedSubscribers.split(',').map(id => id.trim());
-      
-      subscriberQuery = {
-        _id: { $in: subscriberIds },
-        status: status
-      };
-    } else {
-      subscriberQuery = { status };
-    }
-    
-    // Get subscribers
-    const subscribers = await Newsletter.find(subscriberQuery);
-    
-    if (subscribers.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'No subscribers found matching the criteria'
-      });
-    }
-    
-    // Send emails to all subscribers
-    const results = [];
-    const errors = [];
-    
-    for (const subscriber of subscribers) {
-      try {
-        const emailResult = await sendEmail({
-          to: subscriber.email,
-          subject: subject,
-          html: htmlContent,
-          text: htmlContent.replace(/<[^>]*>/g, '') // Basic HTML to text conversion
-        });
-        
-        results.push({
-          email: subscriber.email,
-          success: true,
-          messageId: emailResult.messageId
-        });
-        
-        console.log(`Campaign email sent to ${subscriber.email}`);
-        
-      } catch (emailError) {
-        errors.push({
-          email: subscriber.email,
-          error: emailError.message
-        });
-        console.error(`Failed to send campaign email to ${subscriber.email}:`, emailError);
-      }
-      
-      // Small delay between emails to avoid rate limiting
-      await new Promise(resolve => setTimeout(resolve, 100));
-    }
-    
-    res.json({
-      success: true,
-      message: `Email campaign sent to ${results.length} subscribers`,
-      data: {
-        totalSubscribers: subscribers.length,
-        successfulSends: results.length,
-        failedSends: errors.length,
-        results,
-        errors
-      }
-    });
-    
-  } catch (error) {
-    console.error('Email campaign error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to send email campaign',
       error: error.message
     });
   }
