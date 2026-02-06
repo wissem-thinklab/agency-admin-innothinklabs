@@ -110,7 +110,13 @@ const Newsletter = () => {
   const handleCampaignSubmit = async (e) => {
     e.preventDefault();
     try {
-      const result = await newsletterAPI.sendCampaign(campaignData);
+      // Include selected IDs if "selected" option is chosen
+      const campaignPayload = { ...campaignData };
+      if (campaignData.selectedSubscribers === 'selected') {
+        campaignPayload.selectedIds = selectedNewsletters;
+      }
+      
+      const result = await newsletterAPI.sendCampaign(campaignPayload);
       setCampaignResults(result.data);
       refetch();
       setShowCampaignModal(false);

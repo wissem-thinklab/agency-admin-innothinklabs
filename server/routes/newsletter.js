@@ -123,7 +123,7 @@ router.get('/stats', async (req, res) => {
 // Send email campaign to newsletter subscribers
 router.post('/send-campaign', upload.single('htmlFile'), async (req, res) => {
   try {
-    const { subject, selectedSubscribers = 'all', status = 'active' } = req.body;
+    const { subject, selectedSubscribers = 'all', status = 'active', selectedIds } = req.body;
     
     if (!subject) {
       return res.status(400).json({
@@ -158,10 +158,33 @@ router.post('/send-campaign', upload.single('htmlFile'), async (req, res) => {
     
     // Build subscriber query
     let subscriberQuery = {};
-    if (selectedSubscribers !== 'all') {
+    if (selectedSubscribers !== 'all' && selectedSubscribers !== 'selected') {
       const subscriberIds = Array.isArray(selectedSubscribers) 
         ? selectedSubscribers 
         : selectedSubscribers.split(',').map(id => id.trim());
+      
+      subscriberQuery = {
+        _id: { $in: subscriberIds },
+        status: status
+      };
+    } else if (selectedSubscribers === 'selected') {
+      // Handle "selected" case - parse the JSON string of IDs
+      let subscriberIds = [];
+      try {
+        subscriberIds = selectedIds ? JSON.parse(selectedIds) : [];
+      } catch (parseError) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid selected IDs format'
+        });
+      }
+      
+      if (subscriberIds.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'No subscriber IDs provided for selected option'
+        });
+      }
       
       subscriberQuery = {
         _id: { $in: subscriberIds },

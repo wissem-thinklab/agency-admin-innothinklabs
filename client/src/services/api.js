@@ -325,10 +325,15 @@ export const newsletterAPI = {
     
     // Append form fields
     Object.keys(campaignData).forEach(key => {
-      if (key !== 'htmlFile') {
+      if (key !== 'htmlFile' && key !== 'selectedIds') {
         formData.append(key, campaignData[key]);
       }
     });
+    
+    // Append selected IDs array if it exists
+    if (campaignData.selectedIds && Array.isArray(campaignData.selectedIds)) {
+      formData.append('selectedIds', JSON.stringify(campaignData.selectedIds));
+    }
     
     // Append file if exists
     if (campaignData.htmlFile) {
